@@ -22,7 +22,7 @@ class Database:
     def connection(self):
         return self._connection
 
-    def insert(self, name, space_group, structure, cursor=None):
+    def insert_unit_cell(self, name, space_group, structure, cursor=None):
         cursor = cursor or self._connection
 
         assert isinstance(space_group, int)
