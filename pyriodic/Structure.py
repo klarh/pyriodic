@@ -32,6 +32,36 @@ def fractions_to_coordinates(box, fractions):
         fractions[:, np.newaxis, :]*boxmat[np.newaxis, :, :], axis=2)
     return coordinates
 
+def replicate(box, positions, nx=1, ny=1, nz=1):
+    frac_positions = np.tile(make_fractions(box, positions), (nx, ny, nz, 1, 1))
+    frac_positions[:, ..., 0] += np.arange(nx)[:, np.newaxis, np.newaxis, np.newaxis]
+    frac_positions[:, ..., 1] += np.arange(ny)[np.newaxis, :, np.newaxis, np.newaxis]
+    frac_positions[:, ..., 2] += np.arange(nz)[np.newaxis, np.newaxis, :, np.newaxis]
+
+    frac_positions = frac_positions.reshape((-1, 3))
+    frac_positions /= (nx, ny, nz)
+    frac_positions -= np.floor(frac_positions)
+
+    box = list(box)
+    box[0] *= nx
+    box[1] *= ny
+    box[2] *= nz
+
+    new_positions = fractions_to_coordinates(box, frac_positions)
+
+    return Box(*box), new_positions
+
+def replicate_upto(box, positions, N_target):
+    nbase = int(np.floor((N_target/len(positions))**(1/3)))
+    start_boxdims = np.array(box[:3])
+    ns = [nbase, nbase, nbase]
+    while len(positions)*np.product(ns) < N_target:
+        repl_boxdims = start_boxdims*ns
+        ns[np.argmin(repl_boxdims)] += 1
+    (nx, ny, nz) = ns
+
+    return replicate(box, positions, nx, ny, nz)
+
 class Structure:
     __slots__ = ['positions', 'types', 'box']
 
@@ -48,3 +78,21 @@ class Structure:
     def from_fractional_coordinates(cls, positions, types, box):
         positions = fractions_to_coordinates(box, positions)
         return cls(positions, types, box)
+
+    def replicate(self, nx=1, ny=1, nz=1):
+        (box, positions) = replicate(self.box, self.positions, nx, ny, nz)
+
+        n_tile = len(positions)//len(self.positions)
+
+        types = np.tile(self.types, n_tile)
+
+        return Structure(positions, types, box)
+
+    def replicate_upto(self, N_target):
+        (box, positions) = replicate_upto(self.box, self.positions, N_target)
+
+        n_tile = len(positions)//len(self.positions)
+
+        types = np.tile(self.types, n_tile)
+
+        return Structure(positions, types, box)
