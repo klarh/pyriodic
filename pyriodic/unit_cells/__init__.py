@@ -1,4 +1,3 @@
-import itertools
 from ..Structure import Structure
 
 all_structures = {}
@@ -22,3 +21,6 @@ def load_standard(db):
     with db.connection as conn:
         for (name, spg), structure in all_structures.items():
             db.insert(name, spg, structure, conn)
+
+            safe_name = name.replace('-', '_')
+            globals()[safe_name] = structure

@@ -16,7 +16,7 @@ setup(name='pyriodic-structures',
       ],
       description='Library to list and manipulate well-known 3D structures',
       entry_points={
-          'pyriodic_sources': ['standard = pyriodic.structures:load_standard'],
+          'pyriodic_sources': ['standard = pyriodic.unit_cells:load_standard'],
       },
       extras_require={},
       install_requires=[],

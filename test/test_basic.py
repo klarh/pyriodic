@@ -36,5 +36,8 @@ class TestBasic(unittest.TestCase):
         self.assertGreaterEqual(len(big_structure.types), N)
         self.assertEqual(len(big_structure.positions), len(big_structure.types))
 
+    def test_import(self):
+        from pyriodic.unit_cells import cF4_Cu, cP1_Po
+
 if __name__ == '__main__':
     unittest.main()
