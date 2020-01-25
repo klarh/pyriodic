@@ -72,13 +72,19 @@ class Structure:
 
     def __init__(self, positions, types, box):
         self.positions = np.asarray(positions)
-        self.types = types
+        self.types = np.asarray(types, dtype=np.uint32)
         self.box = box
 
         assert len(self.positions) == len(self.types)
 
         if not isinstance(self.box, Box):
             self.box = Box(*self.box)
+
+    def add_gaussian_noise(self, magnitude):
+        noise = np.random.normal(scale=magnitude, size=self.positions.shape)
+        wrapped_positions = wrap(self.box, self.positions + noise)
+
+        return Structure(wrapped_positions, self.types, self.box)
 
     @property
     def fractional_coordinates(self):
@@ -106,9 +112,3 @@ class Structure:
         types = np.tile(self.types, n_tile)
 
         return Structure(positions, types, box)
-
-    def add_gaussian_noise(self, magnitude):
-        noise = np.random.normal(scale=magnitude, size=self.positions.shape)
-        wrapped_positions = wrap(self.box, self.positions + noise)
-
-        return Structure(wrapped_positions, self.types, self.box)
