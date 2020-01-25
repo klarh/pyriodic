@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 import pyriodic
 
 class TestBasic(unittest.TestCase):
@@ -38,6 +39,16 @@ class TestBasic(unittest.TestCase):
 
     def test_import(self):
         from pyriodic.unit_cells import cF4_Cu, cP1_Po
+
+    def test_wrap(self):
+        positions = [(0, 0, 0), (2., 0, 0)]
+        types = [0, 0]
+        box = [2, 2, 2, 0, 0, 0]
+
+        structure = pyriodic.Structure(positions, types, box)
+        positions = structure.add_gaussian_noise(0).positions
+
+        np.testing.assert_allclose(positions[0], positions[1])
 
 if __name__ == '__main__':
     unittest.main()
