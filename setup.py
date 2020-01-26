@@ -19,7 +19,9 @@ setup(name='pyriodic-structures',
           'pyriodic_sources': ['standard = pyriodic.unit_cells:load_standard'],
       },
       extras_require={},
-      install_requires=[],
+      install_requires=[
+          'numpy',
+      ],
       license='MIT',
       packages=[
           'pyriodic',
