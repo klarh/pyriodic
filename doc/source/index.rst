@@ -19,7 +19,7 @@ Installation
 
 Install `pyriodic` from source on github::
 
-  pip install git+https://github.com/klarh/pyriodic.git#egg=pyriodic
+  pip install git+https://github.com/klarh/pyriodic.git#egg=pyriodic-structures
 
 By default, pyriodic only ships with a few very simple structures;
 other libraries can be added by installing other packages, such as
