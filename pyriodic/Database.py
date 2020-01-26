@@ -5,6 +5,21 @@ import sqlite3
 sqlite3.register_converter('PICKLE', pickle.loads)
 
 class Database:
+    """Manage an in-memory database of structures
+
+    `Database` objects wrap a sqlite database containing structure
+    information. Structures can be added to and read from the
+    database.
+
+    Currently the only table populated in the database is
+    `unit_cells`, with the fields:
+
+      * name (str): Short name of the structure type
+      * space_group (int): Integer representation of the space group of the structure
+      * size (int): Number of particles in the unit cell
+      * structure (:class:`.Structure`): Structure object
+
+    """
     def __init__(self):
         self._connection = sqlite3.connect(
             ':memory:', detect_types=sqlite3.PARSE_DECLTYPES)
@@ -23,6 +38,13 @@ class Database:
         return self._connection
 
     def insert_unit_cell(self, name, space_group, structure, cursor=None):
+        """Insert a unit cell into this database object
+
+        :param name: Short name of the structure
+        :param space_group: Integer representation of the space group for the structure
+        :param structure: :class:`.Structure` object to store
+        :param cursor: Database connection cursor (optional)
+        """
         cursor = cursor or self._connection
 
         assert isinstance(space_group, int)
@@ -35,11 +57,17 @@ class Database:
             (name, space_group, size, encoded_structure))
 
     def query(self, query, *args):
+        """Execute a (sqlite) query on the database
+
+        Parameters are the same as for an `sqlite3` database.
+        """
         for row in self._connection.execute(query, *args):
             yield row
 
     @classmethod
     def make_standard(cls):
+        """Generate the standard database from all installed packages
+        """
         result = cls()
 
         for entry_point in pkg_resources.iter_entry_points('pyriodic_sources'):

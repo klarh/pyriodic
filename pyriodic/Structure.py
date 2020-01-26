@@ -68,6 +68,11 @@ def wrap(box, positions):
     return fractions_to_coordinates(box, fractions)
 
 class Structure:
+    """Container for a single set of coordinates
+
+    Structure objects hold all of the important quantities for a
+    structural example, like coordinates and the system box.
+    """
     __slots__ = ['positions', 'types', 'box']
 
     def __init__(self, positions, types, box):
@@ -81,6 +86,11 @@ class Structure:
             self.box = Box(*self.box)
 
     def add_gaussian_noise(self, magnitude):
+        """Add gaussian noise to each particle
+
+        :param magnitude: Scale of the zero-mean gaussian nose
+        :returns: A new :class:`Structure` with the gaussian noise applied.
+        """
         noise = np.random.normal(scale=magnitude, size=self.positions.shape)
         wrapped_positions = wrap(self.box, self.positions + noise)
 
@@ -96,6 +106,13 @@ class Structure:
         return cls(positions, types, box)
 
     def replicate(self, nx=1, ny=1, nz=1):
+        """Replicate the system a given number of times in each dimension
+
+        :param nx: Number of times to replicate in the x direction
+        :param ny: Number of times to replicate in the y direction
+        :param nz: Number of times to replicate in the z direction
+        :returns: A new :class:`Structure` that has been replicated appropriately
+        """
         (box, positions) = replicate(self.box, self.positions, nx, ny, nz)
 
         n_tile = len(positions)//len(self.positions)
@@ -105,6 +122,14 @@ class Structure:
         return Structure(positions, types, box)
 
     def replicate_upto(self, N_target):
+        """Replicate the system to have at least a given number of particles
+
+        Replicas are iteratively added in the shortest dimension of
+        the box until at least `N_target` particles are present.
+
+        :param N_target: Minimum number of particles to have in the resulting structure
+        :returns: A new :class:`Structure` that has been replicated appropriately
+        """
         (box, positions) = replicate_upto(self.box, self.positions, N_target)
 
         n_tile = len(positions)//len(self.positions)
