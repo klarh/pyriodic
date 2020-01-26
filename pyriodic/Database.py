@@ -34,8 +34,8 @@ class Database:
             'INSERT INTO unit_cells VALUES (?, ?, ?, ?)',
             (name, space_group, size, encoded_structure))
 
-    def query(self, query):
-        for row in self._connection.execute(query):
+    def query(self, query, *args):
+        for row in self._connection.execute(query, *args):
             yield row
 
     @classmethod
