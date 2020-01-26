@@ -26,6 +26,10 @@ setup(name='pyriodic-structures',
       packages=[
           'pyriodic',
       ],
+      project_urls={
+          'Documentation': 'http://pyriodic.readthedocs.io/',
+          'Source': 'https://github.com/klarh/pyriodic'
+          },
       python_requires='>=3',
       version=__version__
       )
