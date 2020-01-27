@@ -34,6 +34,7 @@ setup(name='pyriodic-structures',
       long_description_content_type='text/markdown',
       packages=[
           'pyriodic',
+          'pyriodic.unit_cells',
       ],
       project_urls={
           'Documentation': 'http://pyriodic.readthedocs.io/',
