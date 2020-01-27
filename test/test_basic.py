@@ -50,5 +50,24 @@ class TestBasic(unittest.TestCase):
 
         np.testing.assert_allclose(positions[0], positions[1])
 
+    def test_rescale(self):
+        from pyriodic.unit_cells import cF4_Cu, cI2_W, cP1_Po
+        from pyriodic.Structure import box_to_matrix
+
+        new_struct = cF4_Cu.rescale_volume(5)
+        new_V = np.linalg.det(box_to_matrix(new_struct.box))
+        self.assertAlmostEqual(new_V, 5)
+
+        new_struct = new_struct.rescale_volume(1./5)
+        new_V = np.linalg.det(box_to_matrix(new_struct.box))
+        self.assertAlmostEqual(new_V, 1./5)
+
+        new_struct = cI2_W.rescale_shortest_distance(10)
+        rij = new_struct.positions[1] - new_struct.positions[0]
+        self.assertAlmostEqual(np.linalg.norm(rij), 10)
+
+        new_struct = cP1_Po.rescale_shortest_distance(3)
+        self.assertAlmostEqual(new_struct.box.Lx, 3)
+
 if __name__ == '__main__':
     unittest.main()

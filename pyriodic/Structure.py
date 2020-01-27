@@ -85,6 +85,9 @@ class Structure:
         if not isinstance(self.box, Box):
             self.box = Box(*self.box)
 
+    def __len__(self):
+        return len(self.positions)
+
     def add_gaussian_noise(self, magnitude):
         """Add gaussian noise to each particle
 
@@ -137,3 +140,61 @@ class Structure:
         types = np.tile(self.types, n_tile)
 
         return Structure(positions, types, box)
+
+    def rescale_linear(self, factor):
+        """Rescale all distances in the system by the given factor
+
+        The coordinates and box are scaled by the given factor.
+
+        :param factor: Number to scale all lengths in the system by
+        :returns: a new :class:`Structure` that has been scaled accordingly
+        """
+        new_box = [factor*b for b in self.box[:3]] + list(self.box[3:])
+        return Structure(self.positions*factor, self.types, new_box)
+
+    def rescale_number_density(self, phi):
+        """Rescale the system to the given number density
+
+        The box and all coordinates are scaled by an appropriate
+        factor to produce a box with the given number density (number
+        of particles/volume).
+
+        :param phi: Number density of the resulting system
+        :returns: a new :class:`Structure` with the given density
+        """
+        return self.rescale_volume(len(self)/phi)
+
+    def rescale_shortest_distance(self, l):
+        """Rescale the system to have the given shortest distance between points
+
+        The box and all coordinates are scaled by an appropriate
+        factor to produce a system with the given shortest distance
+        between any two points. This method is currently N^2 in the
+        number of points, but may be improved in the future.
+
+        :param l: Shortest distance of the resulting system
+        :returns: a new :class:`Structure` with the given shortest distance
+        """
+        min_r = min(*self.box[:3])
+
+        if len(self) > 1:
+            all_rijs = self.positions[:, np.newaxis] - self.positions[np.newaxis, :]
+            all_rijs = wrap(self.box, all_rijs.reshape((-1, 3)))
+            all_rijs = all_rijs.reshape((len(self), len(self), 3))
+            all_rs = np.linalg.norm(all_rijs, axis=-1)
+            min_r = min(min_r, np.min(all_rs[np.triu_indices(len(self), 1)]))
+
+        return self.rescale_linear(l/min_r)
+
+    def rescale_volume(self, V):
+        """Rescale the system to the given volume
+
+        The box and all coordinates are scaled by an appropriate
+        factor to produce a box with the given volume.
+
+        :param V: Volume of the resulting system
+        :returns: a new :class:`Structure` with the given volume
+        """
+        current_V = np.abs(np.linalg.det(box_to_matrix(self.box)))
+        factor = pow(V/current_V, 1./3)
+        return self.rescale_linear(factor)
