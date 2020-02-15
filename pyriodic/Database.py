@@ -11,6 +11,8 @@ class Database:
     information. Structures can be added to and read from the
     database.
 
+    Databases should only be written to by a single thread at once.
+
     Currently the only table populated in the database is
     `unit_cells`, with the fields:
 
@@ -22,7 +24,8 @@ class Database:
     """
     def __init__(self):
         self._connection = sqlite3.connect(
-            ':memory:', detect_types=sqlite3.PARSE_DECLTYPES)
+            ':memory:', detect_types=sqlite3.PARSE_DECLTYPES,
+            check_same_thread=False)
 
         self._initialize_db()
 
