@@ -175,7 +175,8 @@ class Structure:
         :param l: Shortest distance of the resulting system
         :returns: a new :class:`Structure` with the given shortest distance
         """
-        min_r = min(*self.box[:3])
+        boxmat = box_to_matrix(self.box)
+        min_r = min(*np.linalg.norm(self.box, axis=0))
 
         if len(self) > 1:
             all_rijs = self.positions[:, np.newaxis] - self.positions[np.newaxis, :]
